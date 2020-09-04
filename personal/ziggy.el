@@ -45,6 +45,7 @@ when toggle off input method, switch to evil-normal-state if current state is ev
 ;;;;;;;;;;;;;;;;;;
 
 (prelude-require-package 'org-ref)
+(require 'org-ref)
 ;; set the bibtex file for org-ref
 (setq reftex-default-bibliography zot_bib)
 ;; set notes, pdf directory
@@ -96,6 +97,7 @@ when toggle off input method, switch to evil-normal-state if current state is ev
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (prelude-require-package 'deft)
+(require 'deft)
 (setq deft-default-extension "org"
       deft-directory roam_notes
       ;; recursively research notes under the directory
@@ -111,7 +113,6 @@ when toggle off input method, switch to evil-normal-state if current state is ev
         (nospace . "-")
         (case-fn . downcase))
     )
-;; (add-to-list 'deft-extension "tex")
 
 ;; helm-bibtex
 (prelude-require-package 'helm-bibtex)
@@ -138,12 +139,22 @@ when toggle off input method, switch to evil-normal-state if current state is ev
        )
       )
 
+(require 'helm-config)
+(global-unset-key (kbd "<f11>"))  ;; f11 used to be toggle frame maximum
+;;(define-key helm-command-map (kbd "<f11>") 'helm-bibtex)
+(global-set-key (kbd "<f11>") 'helm-bibtex)
+
+;; Set pdf viwer for different platform
 (cond
- ((string-equal system-type "darwin")
+ ((string-equal system-type "darwin")  ;; macOS
   (setq bibtex-completion-pdf-open-function
         (lambda (fpath)
           (call-process "open" nil 0 nil "-a" "/Applications/PDF Expert.app" fpath)))
  )
+ ((string-equal system-type "gnu/linux")
+  (setq bibtex-completion-pdf-open-function
+        (lambda (fpath)
+          (call-process "okular" nil 0 nil fpath))))
 )
 
 ;;
@@ -152,7 +163,10 @@ when toggle off input method, switch to evil-normal-state if current state is ev
 ;; useful packages togeher.
 ;;
 (prelude-require-package 'org-roam-bibtex)
+(require 'org-roam-bibtex)
 (add-hook 'after-init-hook #'org-roam-bibtex-mode)
+(define-key org-roam-bibtex-mode-map (kbd "C-c n a") #'orb-note-actions)
+
 ;; This may let us get the true contents of these keywords from bibtex
 (setq org-roam-bibtex-preformat-keywords
       '("=key=" "title" "url" "file" "author-or-editor" "keywords"))
@@ -166,18 +180,21 @@ when toggle off input method, switch to evil-normal-state if current state is ev
 - tags ::
 - keywords :: ${keywords}
 
-\n* ${title}\n  :PROPERTIES:\n  :Custom_ID: ${=key=}\n  :URL: ${url}\n  :AUTHOR: ${author-or-editor}\n  :NOTER_DOCUMENT: %(orb-process-file-field \"${=key=}\")\n  :NOTER_PAGE: \n  :END:\n\n"
+* ${title}
+:PROPERTIES:
+:Custom_ID: ${=key=}
+:URL: ${url}
+:AUTHOR: ${author-or-editor}
+:NOTER_DOCUMENT: %(orb-process-file-field \"${=key=}\")
+:NOTER_PAGE:
+:END:\n"
 
-         :unnarrowed t)))
+         :unnarrowed t))
 
-(setq orb-templates
-      '(("r" "ref" plain (function org-roam-capture--get-point) ""
-         :file-name "${citekey}"
-         :head "#+TITLE: ${citekey}: ${title}\n#+ROAM_KEY: ${ref}\n"
-         :unnarrowed t)))
+      ;;\n* ${title}\n  :PROPERTIES:\n  :Custom_ID: ${=key=}\n  :URL: ${url}\n  :AUTHOR: ${author-or-editor}\n  :NOTER_DOCUMENT: %(orb-process-file-field \"${=key=}\")\n  :NOTER_PAGE: \n  :END:\n\n"
 
-;;
-;; ORG-NOTER
+      ;;
+      ;; ORG-NOTER
 ;; This package help us read pdf and its related notes at the same time in Emacs;;
 (prelude-require-package 'org-noter)
 (setq
