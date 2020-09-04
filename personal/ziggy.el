@@ -1,5 +1,33 @@
 (setq default-frame-alist '((font . "Sarasa Mono SC 14")))
 
+;; Pinyin Input
+(prelude-require-package 'pyim)
+(require 'pyim)
+(require 'pyim-basedict)
+(pyim-basedict-enable)
+(setq default-input-method "pyim")
+(setq pyim-default-scheme 'xiaohe-shuangpin)
+
+(defun evil-toggle-input-method ()
+  "when toggle on input method, switch to evil-insert-state if possible.
+when toggle off input method, switch to evil-normal-state if current state is evil-insert-state"
+  (interactive)
+  (if (not current-input-method)
+      (if (not (string= evil-state "insert"))
+          (evil-insert-state))
+    (if (string= evil-state "insert")
+        (evil-normal-state)))
+  (toggle-input-method))
+
+(global-set-key (kbd "C-\\") 'evil-toggle-input-method)
+
+(cond
+ ((string-equal system-type "darwin")
+  (setq mac-option-modifier 'super
+        mac-command-modifier 'meta)
+  )
+ )
+
 ;;;;;;;;;;;;;;;;;;;;;
 ;; Some self-defined variable to simplify future modifications:
 (setq roam_notes (concat (getenv "HOME") "/silverpath/org-roam-db/")
