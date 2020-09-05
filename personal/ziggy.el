@@ -21,6 +21,7 @@ when toggle off input method, switch to evil-normal-state if current state is ev
 
 (global-set-key (kbd "C-\\") 'evil-toggle-input-method)
 
+;; Use command key as meta in macOS, that means we need to use Alt+C/V to copy/paste
 (cond
  ((string-equal system-type "darwin")
   (setq mac-option-modifier 'super
@@ -30,11 +31,13 @@ when toggle off input method, switch to evil-normal-state if current state is ev
 
 ;;;;;;;;;;;;;;;;;;;;;
 ;; Some self-defined variable to simplify future modifications:
-(setq roam_notes (concat (getenv "HOME") "/silverpath/org-roam-db/")
-      other_notes (concat (getenv "HOME") "/silverpath/org-roam-db/other_notes/")
-      paper_notes (concat (getenv "HOME") "/silverpath/org-roam-db/paper_notes/")
-      zot_bib (concat (getenv "HOME") "/silverpath/org-roam-db/total_bib.bib")
-      pdf_dir (concat (getenv "HOME") "/silverpath/papers/")
+;; Here I choose to use relative path because there are symbol links,
+;; and the absolute path are different in different machines.
+(setq roam_notes "~/silverpath/org-roam-db/"
+      other_notes "~/silverpath/org-roam-db/other_notes/"
+      paper_notes "~/silverpath/org-roam-db/research/paper_notes/"
+      zot_bib "~/silverpath/org-roam-db/total_bib.bib"
+      pdf_dir "~/silverpath/papers/"
       org-directory other_notes
       )
 
@@ -69,19 +72,37 @@ when toggle off input method, switch to evil-normal-state if current state is ev
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (prelude-require-package 'org-roam)
-(setq org-roam-directory roam_notes)
+;; following part is init info for roam
+(setq org-roam-directory roam_notes
+      org-roam-db-location "~/.org-roam.db"  ;; move it out of sync directory.
+      org-roam-tag-sources '(prop last-directory)  ;; let roam use dir to generate tags for us
+      org-id-link-to-org-use-id t ;; make a ID for each file
+      )
+
 (add-hook 'after-init-hook 'org-roam-mode)
 ;; Hide the mode line in the org-roam buffer since it has no meaning
 (add-hook 'org-roam-buffer-prepare-hook #'hide-mode-line-mode)
+
+(define-key org-roam-mode-map (kbd "C-c m l") #'org-roam)
+(define-key org-roam-mode-map (kbd "C-c m i") #'org-roam-insert)
+(define-key org-roam-mode-map (kbd "C-c m f") #'org-roam-find-file)
+(define-key org-roam-mode-map (kbd "C-c m c") #'org-roam-capture)
+(define-key org-roam-mode-map (kbd "C-c m b") #'org-roam-switch-to-buffer)
 
 ;; ORG-ROAM Templates
 (setq org-roam-capture-templates
       '(
         ("d" "Default template" plain (function org-roam-capture--get-point)
          "%?"
-         :file-name "%<%Y%m%d%H%M>-${slug}"
-         :head "#+title: ${title}\n#+roam_alias: \n#+roam_tags: \n\n"
-         :unnarrowed t))
+         :file-name "inbox/%<%Y%m%d-%H%M>-${slug}"
+         :head "#+title: ${title}\n#+roam_alias:\n#+roam_tags:\n\n"
+         :unnarrowed t)
+        ("t" "Term" plain (function org-roam-capture--get-point)
+         "- Category: %^{Related category:}\n- Meaning: "
+         :file-name "research/terms/%<%Y%m%d%-H%M>-${slug}"
+         :head "#+title: ${title}\n#+roam_alias:\n#+roam_tags:\n\n"
+         :unnarrowed t)
+        )
       )
 
 ;;
@@ -165,7 +186,7 @@ when toggle off input method, switch to evil-normal-state if current state is ev
 (prelude-require-package 'org-roam-bibtex)
 (require 'org-roam-bibtex)
 (add-hook 'after-init-hook #'org-roam-bibtex-mode)
-(define-key org-roam-bibtex-mode-map (kbd "C-c n a") #'orb-note-actions)
+(define-key org-roam-bibtex-mode-map (kbd "C-c m a") #'orb-note-actions)
 
 ;; This may let us get the true contents of these keywords from bibtex
 (setq org-roam-bibtex-preformat-keywords
@@ -174,8 +195,9 @@ when toggle off input method, switch to evil-normal-state if current state is ev
 (setq orb-templates
       '(("r" "ref" plain (function org-roam-capture--get-point)
          ""
-         :file-name "${slug}"
-         :head "#+TITLE: ${=key=}: ${title}\n#+ROAM_KEY: ${ref}
+         :file-name "research/paper_notes/${slug}"
+         :head "#+TITLE: ${=key=}: ${title}
+#+ROAM_KEY: ${ref}
 
 - tags ::
 - keywords :: ${keywords}
@@ -187,14 +209,24 @@ when toggle off input method, switch to evil-normal-state if current state is ev
 :AUTHOR: ${author-or-editor}
 :NOTER_DOCUMENT: %(orb-process-file-field \"${=key=}\")
 :NOTER_PAGE:
-:END:\n"
+:END:
+
+** Short Summary
+
+** Reading Notes
+
+** Related Work
+
+** Points
+
+** Evaluation
+
+** Conclusion"
 
          :unnarrowed t)))
 
-      ;;\n* ${title}\n  :PROPERTIES:\n  :Custom_ID: ${=key=}\n  :URL: ${url}\n  :AUTHOR: ${author-or-editor}\n  :NOTER_DOCUMENT: %(orb-process-file-field \"${=key=}\")\n  :NOTER_PAGE: \n  :END:\n\n"
-
-      ;;
-      ;; ORG-NOTER
+;;
+;; ORG-NOTER
 ;; This package help us read pdf and its related notes at the same time in Emacs;;
 (prelude-require-package 'org-noter)
 (setq
