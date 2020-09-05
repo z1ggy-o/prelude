@@ -72,6 +72,7 @@ when toggle off input method, switch to evil-normal-state if current state is ev
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (prelude-require-package 'org-roam)
+(require 'org-roam)
 ;; following part is init info for roam
 (setq org-roam-directory roam_notes
       org-roam-db-location "~/.org-roam.db"  ;; move it out of sync directory.
@@ -80,8 +81,6 @@ when toggle off input method, switch to evil-normal-state if current state is ev
       )
 
 (add-hook 'after-init-hook 'org-roam-mode)
-;; Hide the mode line in the org-roam buffer since it has no meaning
-(add-hook 'org-roam-buffer-prepare-hook #'hide-mode-line-mode)
 
 (define-key org-roam-mode-map (kbd "C-c m l") #'org-roam)
 (define-key org-roam-mode-map (kbd "C-c m i") #'org-roam-insert)
@@ -89,32 +88,32 @@ when toggle off input method, switch to evil-normal-state if current state is ev
 (define-key org-roam-mode-map (kbd "C-c m c") #'org-roam-capture)
 (define-key org-roam-mode-map (kbd "C-c m b") #'org-roam-switch-to-buffer)
 
-;; ORG-ROAM Templates
+;; org-roam templates
 (setq org-roam-capture-templates
       '(
-        ("d" "Default template" plain (function org-roam-capture--get-point)
+        ("d" "default template" plain (function org-roam-capture--get-point)
          "%?"
-         :file-name "inbox/%<%Y%m%d-%H%M>-${slug}"
+         :file-name "inbox/%<%y%m%d-%h%m>-${slug}"
          :head "#+title: ${title}\n#+roam_alias:\n#+roam_tags:\n\n"
          :unnarrowed t)
-        ("t" "Term" plain (function org-roam-capture--get-point)
-         "- Category: %^{Related category:}\n- Meaning: "
-         :file-name "research/terms/%<%Y%m%d%-H%M>-${slug}"
+        ("t" "term" plain (function org-roam-capture--get-point)
+         "- category: %^{related category:}\n- meaning: "
+         :file-name "research/terms/%<%y%m%d%-h%m>-${slug}"
          :head "#+title: ${title}\n#+roam_alias:\n#+roam_tags:\n\n"
          :unnarrowed t)
         )
       )
 
 ;;
-;; From https://rgoswami.me/posts/org-note-workflow/#reference-management
-;; In org-roam buffers, it procides completion for org-roam files using its title
+;; from https://rgoswami.me/posts/org-note-workflow/#reference-management
+;; in org-roam buffers, it procides completion for org-roam files using its title
 ;;
 (prelude-require-package 'company-org-roam)
 (push 'company-org-roam company-backends)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; DEFT PART
-;; Help us to search notes much faster
+;; deft part
+;; help us to search notes much faster
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (prelude-require-package 'deft)
@@ -134,6 +133,7 @@ when toggle off input method, switch to evil-normal-state if current state is ev
         (nospace . "-")
         (case-fn . downcase))
     )
+(global-set-key (kbd "C-c m d") 'deft)
 
 ;; helm-bibtex
 (prelude-require-package 'helm-bibtex)
@@ -144,26 +144,26 @@ when toggle off input method, switch to evil-normal-state if current state is ev
       bibtex-completion-pdf-field "file"  ;; filed in bibtex to help find related pdf. optional
       bibtex-completion-notes-template-multiple-files
       (concat
-       "#+TITLE: ${title}\n"
-       "#+ROAM_KEY: cite:${=key=}\n"
-       "* TODO Notes\n"
-       ":PROPERTIES:\n"
-       ":Custom_ID: ${=key=}\n"
-       ":NOTER_DOCUMENT: %(orb-process-file-field \"${=key=}\")\n"
-       ":AUTHOR: ${author-abbrev}\n"
-       ":JOURNAL: ${journaltitle}\n"
-       ":DATE: ${date}\n"
-       ":YEAR: ${year}\n"
-       ":DOI: ${doi}\n"
-       ":URL: ${url}\n"
-       ":END:\n\n"
+       "#+title: ${title}\n"
+       "#+roam_key: cite:${=key=}\n"
+       "* todo notes\n"
+       ":properties:\n"
+       ":custom_id: ${=key=}\n"
+       ":noter_document: %(orb-process-file-field \"${=key=}\")\n"
+       ":author: ${author-abbrev}\n"
+       ":journal: ${journaltitle}\n"
+       ":date: ${date}\n"
+       ":year: ${year}\n"
+       ":doi: ${doi}\n"
+       ":url: ${url}\n"
+       ":end:\n\n"
        )
       )
 
-(require 'helm-config)
-(global-unset-key (kbd "<f11>"))  ;; f11 used to be toggle frame maximum
+;;(require 'helm-config)
+;;(global-unset-key (kbd "<f11>"))  ;; f11 used to be toggle frame maximum
 ;;(define-key helm-command-map (kbd "<f11>") 'helm-bibtex)
-(global-set-key (kbd "<f11>") 'helm-bibtex)
+(global-set-key (kbd "C-c h") 'helm-bibtex)
 
 ;; Set pdf viwer for different platform
 (cond
@@ -193,7 +193,8 @@ when toggle off input method, switch to evil-normal-state if current state is ev
       '("=key=" "title" "url" "file" "author-or-editor" "keywords"))
 
 (setq orb-templates
-      '(("r" "ref" plain (function org-roam-capture--get-point)
+      '(
+        ("r" "ref + note" plain (function org-roam-capture--get-point)
          ""
          :file-name "research/paper_notes/${slug}"
          :head "#+TITLE: ${=key=}: ${title}
@@ -207,13 +208,9 @@ when toggle off input method, switch to evil-normal-state if current state is ev
 :Custom_ID: ${=key=}
 :URL: ${url}
 :AUTHOR: ${author-or-editor}
-:NOTER_DOCUMENT: %(orb-process-file-field \"${=key=}\")
-:NOTER_PAGE:
 :END:
 
 ** Short Summary
-
-** Reading Notes
 
 ** Related Work
 
@@ -221,7 +218,13 @@ when toggle off input method, switch to evil-normal-state if current state is ev
 
 ** Evaluation
 
-** Conclusion"
+** Conclusion
+
+* Reading Notes
+:PROPERTIES:
+:NOTER_DOCUMENT: %(orb-process-file-field \"${=key=}\")
+:NOTER_PAGE:
+:END:"
 
          :unnarrowed t)))
 
@@ -229,13 +232,42 @@ when toggle off input method, switch to evil-normal-state if current state is ev
 ;; ORG-NOTER
 ;; This package help us read pdf and its related notes at the same time in Emacs;;
 (prelude-require-package 'org-noter)
+(require 'org-noter)
 (setq
     ; The WM can handle splits
-    org-noter-notes-window-location 'other-frame
+    ;; org-noter-notes-window-location 'other-frame
     ;; Please stop opening frames
     org-noter-always-create-frame nil
     ;; I want to see the whole file
     org-noter-hide-other nil
     ;; Everything is relative to the main notes file
     org-noter-notes-search-path (list roam_notes)
+    org-noter-separate-notes-from-heading t
  )
+
+;;
+;; pdf-tools
+;; Reading PDF in emacs
+;;
+(prelude-require-package 'pdf-tools)
+(require 'pdf-tools)
+(pdf-tools-install)
+;;(setq pdf-annot-activate-created-annotations t)
+(define-key pdf-view-mode-map (kbd "h") #'pdf-annot-add-highlight-markup-annotation)
+(define-key pdf-view-mode-map (kbd "u") #'pdf-annot-add-underline-markup-annotation)
+(define-key pdf-view-mode-map (kbd "t") #'pdf-annot-add-text-annotation)
+(define-key pdf-view-mode-map (kbd "d") #'pdf-annot-delete)
+
+;;
+;; org-pdftools
+;; A package that help us to insert link better than the default ~org-noter~
+;;
+(prelude-require-package 'org-pdftools)
+(require 'org-pdftools)
+(add-hook 'org-load-hook #'org-pdftools-setup-link)
+
+;;(prelude-require-package 'org-noter-pdftools)
+(add-to-list 'load-path "~/.emacs.d/elpa/org-noter-pdftools.local/")
+(require 'org-noter-pdftools)  ;; should be loaded after ~org-noter~
+(with-eval-after-load 'pdf-annot
+  (add-hook 'pdf-annot-activate-handler-function #'org-noter-pdftools-jump-to-note))
