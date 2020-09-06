@@ -260,14 +260,17 @@ when toggle off input method, switch to evil-normal-state if current state is ev
 
 ;;
 ;; org-pdftools
-;; A package that help us to insert link better than the default ~org-noter~
+;; A package that help us to insert bind notes and pdf position.
+;; We need next two packages to
 ;;
-(prelude-require-package 'org-pdftools)
-(require 'org-pdftools)
-(add-hook 'org-load-hook #'org-pdftools-setup-link)
+;;(prelude-require-package 'org-pdftools)
+;;(require 'org-pdftools)
+;;(add-hook 'org-load-hook #'org-pdftools-setup-link)
 
 ;;(prelude-require-package 'org-noter-pdftools)
-(add-to-list 'load-path "~/.emacs.d/elpa/org-noter-pdftools.local/")
-(require 'org-noter-pdftools)  ;; should be loaded after ~org-noter~
-(with-eval-after-load 'pdf-annot
-  (add-hook 'pdf-annot-activate-handler-function #'org-noter-pdftools-jump-to-note))
+;; (add-to-list 'load-path "~/.emacs.d/elpa/org-noter-pdftools.local/")
+;; (require 'org-noter-pdftools)  ;; should be loaded after ~org-noter~
+;; (with-eval-after-load 'pdf-annot
+;;   (add-hook 'pdf-annot-activate-handler-function #'org-noter-pdftools-jump-to-note))
+
+;; end of ziggy.el
