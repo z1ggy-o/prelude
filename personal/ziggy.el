@@ -1,10 +1,25 @@
-(setq default-frame-alist '((font . "Sarasa Mono SC 14")))
+(setq default-frame-alist '((font . "Sarasa Mono SC 16")))
+
+;; Turn on auto-fill-mode in org-mode
+(add-hook 'org-mode-hook 'turn-on-auto-fill)
+
+;; quelpa
+;; A package management for install dict for pyim
+;;
+(unless (package-installed-p 'quelpa)
+    (with-temp-buffer
+      (url-insert-file-contents "https://raw.githubusercontent.com/quelpa/quelpa/master/quelpa.el")
+      (eval-buffer)
+      (quelpa-self-upgrade)))
 
 ;; Pinyin Input
 (prelude-require-package 'pyim)
 (require 'pyim)
-(require 'pyim-basedict)
-(pyim-basedict-enable)
+
+(quelpa '(pyim-greatdict :fetcher github :repo "tumashu/pyim-greatdict"))  ;; use quelpa because this dict is not authed by mlpa
+(require 'pyim-greatdict)  ;; a dict that has more than 3 million vocabularies
+(pyim-greatdict-enable)
+
 (setq default-input-method "pyim")
 (setq pyim-default-scheme 'xiaohe-shuangpin)
 
@@ -134,6 +149,7 @@ when toggle off input method, switch to evil-normal-state if current state is ev
         (case-fn . downcase))
     )
 (global-set-key (kbd "C-c m d") 'deft)
+(setq deft-auto-save-interval 20)
 
 ;; helm-bibtex
 (prelude-require-package 'helm-bibtex)
