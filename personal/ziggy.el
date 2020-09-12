@@ -3,26 +3,14 @@
 ;; Turn on auto-fill-mode in org-mode
 (add-hook 'org-mode-hook 'turn-on-auto-fill)
 
-;; quelpa
-;; A package management for install dict for pyim
-;;
-(unless (package-installed-p 'quelpa)
-    (with-temp-buffer
-      (url-insert-file-contents "https://raw.githubusercontent.com/quelpa/quelpa/master/quelpa.el")
-      (eval-buffer)
-      (quelpa-self-upgrade)))
-
 ;; Pinyin Input
-(prelude-require-package 'pyim)
+(prelude-require-packages '(pyim pyim-greatdict))
 (require 'pyim)
-
-(quelpa '(pyim-greatdict :fetcher github :repo "tumashu/pyim-greatdict"))  ;; use quelpa because this dict is not authed by mlpa
-(require 'pyim-greatdict)  ;; a dict that has more than 3 million vocabularies
+(require 'pyim-greatdict)  ;; a dict that has more than 3 million vocabularies. Need to install manually
 (pyim-greatdict-enable)
 
 (setq default-input-method "pyim")
 (setq pyim-default-scheme 'xiaohe-shuangpin)
-
 (defun evil-toggle-input-method ()
   "when toggle on input method, switch to evil-insert-state if possible.
 when toggle off input method, switch to evil-normal-state if current state is evil-insert-state"
