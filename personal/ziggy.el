@@ -1,13 +1,16 @@
-(setq default-frame-alist '((font . "Sarasa Mono SC 14")))
+(setq default-frame-alist '((font . "Sarasa Mono SC 16")))
+
+;; Turn on auto-fill-mode in org-mode
+(add-hook 'org-mode-hook 'turn-on-auto-fill)
 
 ;; Pinyin Input
-(prelude-require-package 'pyim)
+(prelude-require-packages '(pyim pyim-greatdict))
 (require 'pyim)
-(require 'pyim-basedict)
-(pyim-basedict-enable)
+(require 'pyim-greatdict)  ;; a dict that has more than 3 million vocabularies. Need to install manually
+(pyim-greatdict-enable)
+
 (setq default-input-method "pyim")
 (setq pyim-default-scheme 'xiaohe-shuangpin)
-
 (defun evil-toggle-input-method ()
   "when toggle on input method, switch to evil-insert-state if possible.
 when toggle off input method, switch to evil-normal-state if current state is evil-insert-state"
@@ -134,6 +137,7 @@ when toggle off input method, switch to evil-normal-state if current state is ev
         (case-fn . downcase))
     )
 (global-set-key (kbd "C-c m d") 'deft)
+(setq deft-auto-save-interval 20)
 
 ;; helm-bibtex
 (prelude-require-package 'helm-bibtex)
