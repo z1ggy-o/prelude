@@ -249,10 +249,12 @@ when toggle off input method, switch to evil-normal-state if current state is ev
 ;; pdf-tools
 ;; Reading PDF in emacs
 ;;
+;;(setenv "PKG_CONFIG_PATH" (concat (shell-command-to-string "printf %s \"$(brew --prefix libffi)\"") "/lib/pkgconfig/"))
 (prelude-require-package 'pdf-tools)
 (require 'pdf-tools)
 (pdf-tools-install)
 ;;(setq pdf-annot-activate-created-annotations t)
+(setq pdf-view-use-scaling t)
 (define-key pdf-view-mode-map (kbd "h") #'pdf-annot-add-highlight-markup-annotation)
 (define-key pdf-view-mode-map (kbd "u") #'pdf-annot-add-underline-markup-annotation)
 (define-key pdf-view-mode-map (kbd "t") #'pdf-annot-add-text-annotation)
@@ -261,7 +263,7 @@ when toggle off input method, switch to evil-normal-state if current state is ev
 ;;
 ;; org-pdftools
 ;; A package that help us to insert bind notes and pdf position.
-;; We need next two packages to
+; We need next two packages to
 ;;
 ;;(prelude-require-package 'org-pdftools)
 ;;(require 'org-pdftools)
