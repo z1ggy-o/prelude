@@ -4,8 +4,9 @@
 (add-hook 'org-mode-hook 'turn-on-auto-fill)
 
 ;; Pinyin Input
-(prelude-require-packages '(pyim pyim-greatdict))
+(prelude-require-package 'pyim)
 (require 'pyim)
+(add-to-list 'load-path "~/.emacs.d/elpa/pyim-greatdict/")
 (require 'pyim-greatdict)  ;; a dict that has more than 3 million vocabularies. Need to install manually
 (pyim-greatdict-enable)
 
@@ -76,11 +77,12 @@ when toggle off input method, switch to evil-normal-state if current state is ev
 
 (prelude-require-package 'org-roam)
 (require 'org-roam)
+(require 'org-roam-protocol)
 ;; following part is init info for roam
 (setq org-roam-directory roam_notes
       org-roam-db-location "~/.org-roam.db"  ;; move it out of sync directory.
       org-roam-tag-sources '(prop last-directory)  ;; let roam use dir to generate tags for us
-      org-id-link-to-org-use-id t ;; make a ID for each file
+      ;; org-id-link-to-org-use-id t ;; make a ID for each file
       )
 
 (add-hook 'after-init-hook 'org-roam-mode)
@@ -96,16 +98,51 @@ when toggle off input method, switch to evil-normal-state if current state is ev
       '(
         ("d" "default template" plain (function org-roam-capture--get-point)
          "%?"
-         :file-name "inbox/%<%y%m%d-%h%m>-${slug}"
+         :file-name "inbox/%<%y%m%d%H%M>-${slug}"
          :head "#+title: ${title}\n#+roam_alias:\n#+roam_tags:\n\n"
+         :unnarrowed t)
+        ("l" "literature: book, blog, web..." plain (function org-roam-capture--get-point)
+         "%?"
+         :file-name "literature/%<%y%m%d%H%M>-${slug}"
+         :head "#+title: ${title}\n#+roam_alias:\n#+roam_tags:\n\n- tags :: "
+         :unnarrowed t)
+        ("c" "concept" plain (function org-roam-capture--get-point)
+         "%?"
+         :file-name "concept/%<%y%m%d%H%M>-${slug}"
+         :head "#+title: ${title}\n#+roam_alias:\n#+roam_tags:\n\n- tags :: "
          :unnarrowed t)
         ("t" "term" plain (function org-roam-capture--get-point)
          "- category: %^{related category:}\n- meaning: "
-         :file-name "research/terms/%<%y%m%d%-h%m>-${slug}"
-         :head "#+title: ${title}\n#+roam_alias:\n#+roam_tags:\n\n"
+         :file-name "research/terms/%<%y%m%d%H%M>-${slug}"
+         :head "#+title: ${title}\n#+roam_alias:\n#+roam_tags:\n\n- tags :: "
+         :unnarrowed t)
+        ("o" "outlines" plain (function org-roam-capture--get-point)
+         "%?"
+         :file-name "outlines/${slug}"
+         :head "#+title: ${title}\n#+roam_alias:\n#+roam_tags:\n\n- tags :: "
          :unnarrowed t)
         )
-      )
+    )
+(setq org-roam-capture-ref-templates
+      '(("r" "ref" plain (function org-roam-capture--get-point)
+         "%?"
+         :file-name "literature/%<%y%m%d%H%M>-${slug}"
+         :head "#+roam_key: ${ref}
+#+roam_tags: website
+#+title: ${title}
+
+- source :: ${ref}"
+         :unnarrowed t)
+        ("a" "Annotation" plain (function org-roam-capture--get-point)
+               "%U ${body}\n"
+         :file-name "literature/%<%y%m%d%H%M>-${slug}"
+         :head "#+title: ${title}
+#+roam_key: ${ref}
+#+roam_tags: website
+
+- source :: ${ref}"
+               :immediate-finish t
+               :unnarrowed t)))
 
 ;;
 ;; from https://rgoswami.me/posts/org-note-workflow/#reference-management
