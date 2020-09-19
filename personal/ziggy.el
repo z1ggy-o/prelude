@@ -98,22 +98,22 @@ when toggle off input method, switch to evil-normal-state if current state is ev
       '(
         ("d" "default template" plain (function org-roam-capture--get-point)
          "%?"
-         :file-name "inbox/%<%y%m%d%H%M>-${slug}"
+         :file-name "inbox/%<%y%m%d>-${slug}"
          :head "#+title: ${title}\n#+roam_alias:\n#+roam_tags:\n\n"
          :unnarrowed t)
         ("l" "literature: book, blog, web..." plain (function org-roam-capture--get-point)
          "%?"
-         :file-name "literature/%<%y%m%d%H%M>-${slug}"
+         :file-name "literature/%<%y%m%d>-${slug}"
          :head "#+title: ${title}\n#+roam_alias:\n#+roam_tags:\n\n- tags :: "
          :unnarrowed t)
         ("c" "concept" plain (function org-roam-capture--get-point)
          "%?"
-         :file-name "concept/%<%y%m%d%H%M>-${slug}"
+         :file-name "concept/%<%y%m%d%>-${slug}"
          :head "#+title: ${title}\n#+roam_alias:\n#+roam_tags:\n\n- tags :: "
          :unnarrowed t)
         ("t" "term" plain (function org-roam-capture--get-point)
          "- category: %^{related category:}\n- meaning: "
-         :file-name "research/terms/%<%y%m%d%H%M>-${slug}"
+         :file-name "research/terms/%<%y%m%d>-${slug}"
          :head "#+title: ${title}\n#+roam_alias:\n#+roam_tags:\n\n- tags :: "
          :unnarrowed t)
         ("o" "outlines" plain (function org-roam-capture--get-point)
@@ -126,7 +126,7 @@ when toggle off input method, switch to evil-normal-state if current state is ev
 (setq org-roam-capture-ref-templates
       '(("r" "ref" plain (function org-roam-capture--get-point)
          "%?"
-         :file-name "literature/%<%y%m%d%H%M>-${slug}"
+         :file-name "literature/%<%y%m%d>-${slug}"
          :head "#+roam_key: ${ref}
 #+roam_tags: website
 #+title: ${title}
@@ -135,7 +135,7 @@ when toggle off input method, switch to evil-normal-state if current state is ev
          :unnarrowed t)
         ("a" "Annotation" plain (function org-roam-capture--get-point)
                "%U ${body}\n"
-         :file-name "literature/%<%y%m%d%H%M>-${slug}"
+         :file-name "literature/%<%y%m%d>-${slug}"
          :head "#+title: ${title}
 #+roam_key: ${ref}
 #+roam_tags: website
@@ -315,5 +315,34 @@ when toggle off input method, switch to evil-normal-state if current state is ev
 ;; (require 'org-noter-pdftools)  ;; should be loaded after ~org-noter~
 ;; (with-eval-after-load 'pdf-annot
 ;;   (add-hook 'pdf-annot-activate-handler-function #'org-noter-pdftools-jump-to-note))
+
+(prelude-require-package 'org-download)
+(require 'org-download)
+(add-hook 'dired-mode-hook 'org-download-enable)
+;; A help func to put imgs into a subdir that has the same name with the buffer
+(defun zgy/org-download-method (link)
+    (let* ((filename
+            (file-name-nondirectory
+             (car (url-path-and-query
+                   (url-generic-parse-url link)))))
+           ;; Create folder name with current buffer name, and place in root dir
+           (dirname (concat "~/silverpath/images/"
+                            (replace-regexp-in-string " " "_"
+                                                      (downcase (file-name-base buffer-file-name)))))
+           (filename-with-timestamp (format "%s%s.%s"
+                                            (file-name-sans-extension filename)
+                                            (format-time-string org-download-timestamp)
+                                            (file-name-extension filename))))
+      (make-directory dirname t)
+      (expand-file-name filename-with-timestamp dirname)))
+
+(setq org-download-screenshot-method
+      (cond
+       ;;((string-equal system-type "darwin") "screencapture -i %s")
+       ((eq system-type 'darwin) "screencapture -i %s")
+       ((eq system-type 'gnu/linux)
+        (cond ((executable-find "maim")  "maim -u -s %s")
+                ((executable-find "scrot") "scrot -s %s")))))
+(setq org-download-method 'zgy/org-download-method)
 
 ;; end of ziggy.el
