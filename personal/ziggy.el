@@ -62,12 +62,12 @@ when toggle off input method, switch to evil-normal-state if current state is ev
       org-ref-pdf-directory pdf_dir)
 ;;
 (setq
-      ;; use helm-bibtex to find pdf
-      org-ref-get-pdf-filename-function 'org-ref-get-pdf-filename-helm-bibtex
-      org-ref-note-title-format "* TODO %y - %t\n :PROPERTIES:\n  :Custom_ID: %k\n  :NOTER_DOCUMENT: %F\n :ROAM_KEY: cite:%k\n  :AUTHOR: %9a\n  :JOURNAL: %j\n  :YEAR: %y\n  :VOLUME: %v\n  :PAGES: %p\n  :DOI: %D\n  :URL: %U\n :END:\n\n"
-      ;; use org-roam's note setting instead of org-ref's
-      org-ref-notes-function 'orb-edit-notes
-      )
+ ;; use helm-bibtex to find pdf
+ org-ref-get-pdf-filename-function 'org-ref-get-pdf-filename-helm-bibtex
+ org-ref-note-title-format "* TODO %y - %t\n :PROPERTIES:\n  :Custom_ID: %k\n  :NOTER_DOCUMENT: %F\n :ROAM_KEY: cite:%k\n  :AUTHOR: %9a\n  :JOURNAL: %j\n  :YEAR: %y\n  :VOLUME: %v\n  :PAGES: %p\n  :DOI: %D\n  :URL: %U\n :END:\n\n"
+ ;; use org-roam's note setting instead of org-ref's
+ org-ref-notes-function 'orb-edit-notes
+ )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; ORG-ROAM PART
@@ -108,12 +108,12 @@ when toggle off input method, switch to evil-normal-state if current state is ev
          :unnarrowed t)
         ("c" "concept" plain (function org-roam-capture--get-point)
          "%?"
-         :file-name "concept/%<%y%m%d%>-${slug}"
+         :file-name "concept/${slug}"
          :head "#+title: ${title}\n#+roam_alias:\n#+roam_tags:\n\n- tags :: "
          :unnarrowed t)
         ("t" "term" plain (function org-roam-capture--get-point)
          "- category: %^{related category:}\n- meaning: "
-         :file-name "research/terms/%<%y%m%d>-${slug}"
+         :file-name "research/terms/${slug}"
          :head "#+title: ${title}\n#+roam_alias:\n#+roam_tags:\n\n- tags :: "
          :unnarrowed t)
         ("o" "outlines" plain (function org-roam-capture--get-point)
@@ -122,27 +122,34 @@ when toggle off input method, switch to evil-normal-state if current state is ev
          :head "#+title: ${title}\n#+roam_alias:\n#+roam_tags:\n\n- tags :: "
          :unnarrowed t)
         )
-    )
+      )
 (setq org-roam-capture-ref-templates
       '(("r" "ref" plain (function org-roam-capture--get-point)
          "%?"
-         :file-name "literature/%<%y%m%d>-${slug}"
-         :head "#+roam_key: ${ref}
-#+roam_tags: website
-#+title: ${title}
-
-- source :: ${ref}"
-         :unnarrowed t)
-        ("a" "Annotation" plain (function org-roam-capture--get-point)
-               "%U ${body}\n"
-         :file-name "literature/%<%y%m%d>-${slug}"
+         :file-name "literature/${slug}"
          :head "#+title: ${title}
 #+roam_key: ${ref}
 #+roam_tags: website
 
 - source :: ${ref}"
-               :immediate-finish t
-               :unnarrowed t)))
+         :unnarrowed t)
+        ("a" "Annotation" plain (function org-roam-capture--get-point)
+         "%U ${body}\n"
+         :file-name "literature/${slug}"
+         :head "#+title: ${title}
+#+roam_key: ${ref}
+#+roam_tags: website
+
+- source :: ${ref}"
+         :immediate-finish t
+         :unnarrowed t)))
+
+;; org-roam-dailies
+(setq org-roam-dailies-directory "dailies")
+
+(setq org-roam-dailies-capture-templates
+      '(("d" "daily" entry #'org-roam-capture--get-point
+         "* %?\n")))
 
 ;;
 ;; from https://rgoswami.me/posts/org-note-workflow/#reference-management
@@ -172,7 +179,7 @@ when toggle off input method, switch to evil-normal-state if current state is ev
       '((noslash . "-")
         (nospace . "-")
         (case-fn . downcase))
-    )
+      )
 (global-set-key (kbd "C-c m d") 'deft)
 (setq deft-auto-save-interval 20)
 
@@ -212,12 +219,12 @@ when toggle off input method, switch to evil-normal-state if current state is ev
   (setq bibtex-completion-pdf-open-function
         (lambda (fpath)
           (call-process "open" nil 0 nil "-a" "/Applications/PDF Expert.app" fpath)))
- )
+  )
  ((string-equal system-type "gnu/linux")
   (setq bibtex-completion-pdf-open-function
         (lambda (fpath)
           (call-process "okular" nil 0 nil fpath))))
-)
+ )
 
 ;;
 ;; ORG-ROAM-BIBTEX
@@ -267,7 +274,31 @@ when toggle off input method, switch to evil-normal-state if current state is ev
 :NOTER_PAGE:
 :END:"
 
-         :unnarrowed t)))
+         :unnarrowed t)
+        ("b" "book" plain (function org-roam-capture--get-point)
+         ""
+         :file-name "literature/${slug}"
+         :head "#+TITLE: ${=key=}: ${title}
+#+ROAM_KEY: ${ref}
+
+- tags ::
+- keywords :: ${keywords}
+
+* ${title}
+:PROPERTIES:
+:Custom_ID: ${=key=}
+:URL: ${url}
+:AUTHOR: ${author-or-editor}
+:END:
+
+* Reading Notes
+:PROPERTIES:
+:NOTER_DOCUMENT: %(orb-process-file-field \"${=key=}\")
+:NOTER_PAGE:
+:END:"
+
+         :unnarrowed t)
+        ))
 
 ;;
 ;; ORG-NOTER
@@ -275,15 +306,15 @@ when toggle off input method, switch to evil-normal-state if current state is ev
 (prelude-require-package 'org-noter)
 (require 'org-noter)
 (setq
-    ; The WM can handle splits
-    ;; org-noter-notes-window-location 'other-frame
-    ;; Please stop opening frames
-    org-noter-always-create-frame nil
-    ;; I want to see the whole file
-    org-noter-hide-other nil
-    ;; Everything is relative to the main notes file
-    org-noter-notes-search-path (list roam_notes)
-    org-noter-separate-notes-from-heading t
+                                        ; The WM can handle splits
+ ;; org-noter-notes-window-location 'other-frame
+ ;; Please stop opening frames
+ org-noter-always-create-frame nil
+ ;; I want to see the whole file
+ org-noter-hide-other nil
+ ;; Everything is relative to the main notes file
+ org-noter-notes-search-path (list roam_notes)
+ org-noter-separate-notes-from-heading t
  )
 
 ;;
@@ -304,7 +335,7 @@ when toggle off input method, switch to evil-normal-state if current state is ev
 ;;
 ;; org-pdftools
 ;; A package that help us to insert bind notes and pdf position.
-; We need next two packages to
+                                        ; We need next two packages to
 ;;
 ;;(prelude-require-package 'org-pdftools)
 ;;(require 'org-pdftools)
@@ -321,20 +352,20 @@ when toggle off input method, switch to evil-normal-state if current state is ev
 (add-hook 'dired-mode-hook 'org-download-enable)
 ;; A help func to put imgs into a subdir that has the same name with the buffer
 (defun zgy/org-download-method (link)
-    (let* ((filename
-            (file-name-nondirectory
-             (car (url-path-and-query
-                   (url-generic-parse-url link)))))
-           ;; Create folder name with current buffer name, and place in root dir
-           (dirname (concat "~/silverpath/images/"
-                            (replace-regexp-in-string " " "_"
-                                                      (downcase (file-name-base buffer-file-name)))))
-           (filename-with-timestamp (format "%s%s.%s"
-                                            (file-name-sans-extension filename)
-                                            (format-time-string org-download-timestamp)
-                                            (file-name-extension filename))))
-      (make-directory dirname t)
-      (expand-file-name filename-with-timestamp dirname)))
+  (let* ((filename
+          (file-name-nondirectory
+           (car (url-path-and-query
+                 (url-generic-parse-url link)))))
+         ;; Create folder name with current buffer name, and place in root dir
+         (dirname (concat "~/silverpath/images/"
+                          (replace-regexp-in-string " " "_"
+                                                    (downcase (file-name-base buffer-file-name)))))
+         (filename-with-timestamp (format "%s%s.%s"
+                                          (file-name-sans-extension filename)
+                                          (format-time-string org-download-timestamp)
+                                          (file-name-extension filename))))
+    (make-directory dirname t)
+    (expand-file-name filename-with-timestamp dirname)))
 
 (setq org-download-screenshot-method
       (cond
@@ -342,7 +373,7 @@ when toggle off input method, switch to evil-normal-state if current state is ev
        ((eq system-type 'darwin) "screencapture -i %s")
        ((eq system-type 'gnu/linux)
         (cond ((executable-find "maim")  "maim -u -s %s")
-                ((executable-find "scrot") "scrot -s %s")))))
+              ((executable-find "scrot") "scrot -s %s")))))
 (setq org-download-method 'zgy/org-download-method)
 
 ;; end of ziggy.el
