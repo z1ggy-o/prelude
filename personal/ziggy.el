@@ -38,11 +38,11 @@ when toggle off input method, switch to evil-normal-state if current state is ev
 ;; Here I choose to use relative path because there are symbol links,
 ;; and the absolute path are different in different machines.
 (setq roam_notes "~/silverpath/org-roam-db/"
-      other_notes "~/silverpath/org-roam-db/other_notes/"
+      lit_notes "~/silverpath/org-roam-db/literature/"
       paper_notes "~/silverpath/org-roam-db/research/paper_notes/"
       zot_bib "~/silverpath/org-roam-db/total_bib.bib"
       pdf_dir "~/silverpath/papers/"
-      org-directory other_notes
+      ;; org-directory other_notes
       )
 
 ;;;;;;;;;;;;;;;;;;
@@ -54,9 +54,10 @@ when toggle off input method, switch to evil-normal-state if current state is ev
 (prelude-require-package 'org-ref)
 (require 'org-ref)
 ;; set the bibtex file for org-ref
-(setq reftex-default-bibliography zot_bib)
+(setq reftex-default-bibliography (list (concat roam_notes "total_bib.bib")
+                                    (concat roam_notes "my_books.bib")))
 ;; set notes, pdf directory
-(setq org-ref-bibligraphy-notes (concat other_notes "bibnotes.org")
+(setq org-ref-bibligraphy-notes (concat lit_notes "bibnotes.org")
       org-ref-notes-directory paper_notes
       org-ref-default-bibliography zot_bib
       org-ref-pdf-directory pdf_dir)
@@ -186,7 +187,10 @@ when toggle off input method, switch to evil-normal-state if current state is ev
 ;; helm-bibtex
 (prelude-require-package 'helm-bibtex)
 (autoload 'helm-bibtex "helm-bibtex" "" t)
-(setq bibtex-completion-bibliography zot_bib
+(setq
+      ;;bibtex-completion-bibliography zot_bib
+ bibtex-completion-bibliography (list (concat roam_notes "total_bib.bib")
+                                    (concat roam_notes "my_books.bib"))
       bibtex-completion-notes-path paper_notes
       bibtex-completion-library-path pdf_dir
       bibtex-completion-pdf-field "file"  ;; filed in bibtex to help find related pdf. optional
