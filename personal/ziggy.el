@@ -97,7 +97,7 @@ when toggle off input method, switch to evil-normal-state if current state is ev
 ;; org-roam templates
 (setq org-roam-capture-templates
       '(
-        ("d" "default template" plain (function org-roam-capture--get-point)
+        ("i" "inbox" plain (function org-roam-capture--get-point)
          "%?"
          :file-name "inbox/%<%y%m%d>-${slug}"
          :head "#+title: ${title}\n#+roam_alias:\n#+roam_tags:\n\n"
@@ -110,11 +110,6 @@ when toggle off input method, switch to evil-normal-state if current state is ev
         ("c" "concept" plain (function org-roam-capture--get-point)
          "%?"
          :file-name "concept/${slug}"
-         :head "#+title: ${title}\n#+roam_alias:\n#+roam_tags:\n\n- tags :: "
-         :unnarrowed t)
-        ("t" "term" plain (function org-roam-capture--get-point)
-         "- category: %^{related category:}\n- meaning: "
-         :file-name "research/terms/${slug}"
          :head "#+title: ${title}\n#+roam_alias:\n#+roam_tags:\n\n- tags :: "
          :unnarrowed t)
         ("o" "outlines" plain (function org-roam-capture--get-point)
@@ -188,7 +183,6 @@ when toggle off input method, switch to evil-normal-state if current state is ev
 (prelude-require-package 'helm-bibtex)
 (autoload 'helm-bibtex "helm-bibtex" "" t)
 (setq
-      ;;bibtex-completion-bibliography zot_bib
  bibtex-completion-bibliography (list (concat roam_notes "total_bib.bib")
                                     (concat roam_notes "my_books.bib"))
       bibtex-completion-notes-path paper_notes
@@ -281,7 +275,7 @@ when toggle off input method, switch to evil-normal-state if current state is ev
          :unnarrowed t)
         ("b" "book" plain (function org-roam-capture--get-point)
          ""
-         :file-name "literature/${slug}"
+         :file-name "outlines/${slug}"
          :head "#+TITLE: ${=key=}: ${title}
 #+ROAM_KEY: ${ref}
 
